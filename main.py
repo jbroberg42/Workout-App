@@ -6,7 +6,6 @@ import time
 current_date = datetime.date.today()
 
 
-
 # Y/N returns True or False
 def get_conf(prompt):
     while True:
@@ -124,7 +123,8 @@ def startup_menu():
                     print('\nSorry, that profile does not exist.')
             case _:
                 print("Please input a valid command.")
-        wait()
+
+
 
 def user_menu():
     while True:
@@ -135,16 +135,29 @@ def user_menu():
 # prompt the user to select from or add to the exercise SQL table
             case 'a':
                 while True:
-                    print('Adding set...\nSelect exercise:')
+                    print('Adding set...\n\nSelect exercise:')
+                    available_exercise_ids = []
                     for type in sql.list_exercise_types():
+                        available_exercise_ids.append(type[0])
                         print("[{}] --> {}".format(type[0], type[1]))
-                    print('[A]dd new exercise')
-                    match input("> ").lower():
+                    print('[A]dd new exercise\n')
+                    user_input = input("> ").lower()
+                    match user_input:
                         case 'a':
                             sql.add_exercise_type(input('Enter name of new exercise: > '))
                         case _:
-                            pass
-            # print('SYNTAX: [SET]x[REPS]x[WEIGHT]')
+                            if int(user_input) in available_exercise_ids:
+                                selected_exercise_id = user_input
+                                set_input = input('Enter set information.\nSYNTAX: [SET]x[REPS]x[WEIGHT]\n\n> ')
+                                #try:
+                                sets_count, reps_count, weight = set_input.strip().split('x')
+                                for i in range(int(sets_count)):
+                                    sql.add_set(current_profile.id, reps_count, selected_exercise_id, weight, current_date)
+                                print(sql.list_sets(current_profile.id))
+                                #except:
+                            else:
+                                print('Please enter a valid command.\n')
+            
 
 # allow the user to view their history
             case 'v':
@@ -163,7 +176,6 @@ if __name__ == "__main__":
 
     # Greet the user.
     print("\n\nHi, " + current_profile.name + "!\n\n")
-    wait()
     
     # Run the user menu and allow users to add, view, or delete sets.
     user_menu()

@@ -38,7 +38,8 @@ def create_sets_table():
         profile_id integer,
         reps integer,
         exercise_id integer,
-        timestamp DATETIME
+        weight integer,
+        timestamp text
         )""")
 
 
@@ -78,8 +79,8 @@ def list_all_profiles():
 
 #SQL commands that deal with set data
 
-def add_set(profile_id, reps, exercise_id, timestamp):
-    executeSQL("INSERT INTO sets VALUES ('{}', '{}', '{}', '{}')".format(profile_id, reps, exercise_id, timestamp))
+def add_set(profile_id, reps, exercise_id, weight, timestamp):
+    executeSQL("INSERT INTO sets VALUES ({}, {}, {}, {}, '{}')".format(profile_id, reps, exercise_id, weight, timestamp))
 
 
 def list_sets(profile_id):
