@@ -10,12 +10,12 @@ import os.path
 global database_name
 database_filename = 'workout_app.db'
 
-def executeSQL(command, argument=None, fetchall=False, fetchone=False):
+def executeSQL(command, *args, fetchall=False, fetchone=False):
     output = None
     conn = sqlite3.connect(f'{database_filename}')
     c = conn.cursor()
 
-    c.execute(command.format(argument))
+    c.execute(command.format(args))
 
     if fetchall:
         output = c.fetchall()
@@ -83,8 +83,11 @@ def add_set(profile_id, reps, exercise_id, weight, timestamp):
     executeSQL("INSERT INTO sets VALUES ({}, {}, {}, {}, '{}')".format(profile_id, reps, exercise_id, weight, timestamp))
 
 
-def list_sets(profile_id):
-    sets = executeSQL("SELECT * FROM sets WHERE profile_id = {}".format(profile_id), fetchall=True)
+def list_sets(profile_id, exercise_id=None):
+    if exercise_id != None:
+        sets = executeSQL("SELECT * FROM sets WHERE profile_id = {} AND exercise_id = {}".format(profile_id, exercise_id), fetchall=True)
+    else:
+        sets = executeSQL("SELECT * FROM sets WHERE profile_id = {}".format(profile_id), fetchall=True)
     return sets
 
 
@@ -97,3 +100,7 @@ def add_exercise_type(exercise_type):
 def list_exercise_types():
     exercises = executeSQL("SELECT rowid, * FROM exercises", fetchall=True)
     return exercises
+
+def get_exercise_type(id):
+    exercise = executeSQL("SELECT * FROM exercises WHERE rowid = {}".format(id), fetchone=True)
+    return exercise
