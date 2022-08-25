@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import sqlfunctions as sql
 import datetime
 import time
@@ -72,7 +73,7 @@ def startup_menu():
         for profile in existing_profiles:
             available_ids.append(profile[0])
             print("--> {}".format(profile[1]))
-        if len(available_ids) == 0:
+        if len(available_ids) < 1:
             print("--> No profiles currently exist.")
         print("[O]pen existing profile")
         print("[C]reate new profile")
@@ -86,27 +87,37 @@ def startup_menu():
                 sql.add_profile(input('\nEnter new profile name:\n> '))
 
             case 'd':
+                if len(available_ids) < 1:
+                    print('\n\n\nThere are no existing profiles to delete.  Press [C] to create one.')
+                    continue
                 print('\n\n\nDeleting profile...')
                 for profile in existing_profiles:
                     print("[{}] --> {}".format(profile[0], profile[1]))
                 selected_id = get_int('\nEnter id of profile to delete.')
                 if selected_id in available_ids:
                     profile_to_delete = Profile(selected_id)
-                    if get_conf("\n\n\nAre you sure you would like to delete  {} ? You cannot undo this action.".format(profile_to_delete.name)):
-                        sql.del_profile(profile_to_delete.name)
+                    if get_conf("\n\n\nAre you sure you would like to delete {} and all their data? You cannot undo this action.".format(profile_to_delete.name)):
+                        sql.del_profile(profile_to_delete.id)
+
                 else:
                     print('\n\n\nError: Profile with that id does not exist.')
             case 'o':
+                if len(available_ids) < 1:
+                    print('\n\n\nThere are no existing profiles.  Press [C] to create one.')
+                    continue
                 for profile in existing_profiles:
                     print("[{}] --> {}".format(profile[0], profile[1]))
                 selected_id = input('\nPlease select the id of desired profile. > ')
-                if selected_id in available_ids:
+                try:
+                    if int(selected_id) in available_ids:
 
-                    global current_profile
-                    current_profile = Profile(selected_id)
-                    
-                    break
-                else:
+                        global current_profile
+                        current_profile = Profile(selected_id)
+                        
+                        break
+                    else:
+                        print('\n\n\nSorry, that profile does not exist.')
+                except ValueError:
                     print('\n\n\nSorry, that profile does not exist.')
             case _:
                 print("\n\n\nPlease input a valid command.")
@@ -124,21 +135,21 @@ def user_menu():
             case 'e':
                 break
             case 'a':
-                print('\n\n\nAdding set...\n\n\nSelect exercise:')
-                available_exercise_ids = []
-                for type in sql.list_exercise_types():
-                    available_exercise_ids.append(type[0])
-                    print("[{}] --> {}".format(type[0], type[1]))
-                print('[A]dd new exercise')
-                print("[B]ack")
+                print('\n\n\nAdding set...')
                 while True:
+                    available_exercise_ids = []
+                    for type in sql.list_exercise_types():
+                        available_exercise_ids.append(type[0])
+                        print("[{}] --> {}".format(type[0], type[1]))
+                    print('[A]dd new exercise')
+                    print("[B]ack")
                     user_input = input("> ").lower()
                     match user_input:
                         case 'b':
                             break
                         case 'a':
                             sql.add_exercise_type(input('\n\n\nEnter name of new exercise: > '))
-                            break
+                            continue
                         case _:
                             if int(user_input) in available_exercise_ids:
                                 selected_exercise_id = user_input

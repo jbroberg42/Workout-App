@@ -63,8 +63,9 @@ def add_profile(profile_name):
     executeSQL("INSERT INTO profiles VALUES ('{}')".format(profile_name))
 
 
-def del_profile(profile_name):
-    executeSQL("DELETE FROM profiles WHERE profile_name='{}'".format(profile_name))
+def del_profile(profile_id):
+    executeSQL("DELETE FROM profiles WHERE rowid='{}'".format(profile_id))
+    executeSQL("DELETE FROM sets WHERE profile_id={}".format(profile_id))
 
 
 def get_profile_name(profile_id):
